@@ -1,0 +1,144 @@
+<VirtualHost *:80>
+    ServerName domain.com
+    ServerAlias www.domain.com
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    ProxyVia Full
+
+    <Proxy *>
+        Require all granted
+    </Proxy>
+
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName website.com
+    ServerAlias *.website.com
+    ProxyPreserveHost on
+    ProxyPass / http://localhost:3000/
+    ProxyPassReverse / http://localhost:3000/
+    LogLevel warn
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" **%T/%D**" combined
+    ErrorLog /home/ubuntu/website/error.log
+    CustomLog /home/ubuntu/website/access.log combined
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/website.tech.crt
+    SSLCertificateKeyFile  /etc/ssl/website.tech.key
+</VirtualHost>
+
+
+===========================================
+Use a single name-based virtual host 
+<VirtualHost *:80>
+    ServerName mycompany.com
+     
+    ProxyRequests Off
+    ProxyVia Off
+     
+    <Proxy "*">
+         Require all granted
+    </Proxy>
+ 
+    ProxyPass /jira http://<internal_domain>:8080/jira
+    ProxyPassReverse /jira http://<internal_domain>:8080/jira
+ 
+    ProxyPass /bitbucket http://<internal_domain>:7990/bitbucket
+    ProxyPassReverse /bitbucket http://<internal_domain>:7990/bitbucket
+</VirtualHost>
+
+=======================================
+multiple name-based virtual hosts 
+<VirtualHost *:80>
+    ServerName myjira.com
+     
+    ProxyRequests Off
+    ProxyVia Off
+     
+    <Proxy *>
+         Require all granted
+    </Proxy>
+ 
+    ProxyPass /jira http://<internal_domain>:8080/jira
+    ProxyPassReverse /jira http://<internal_domain>:8080/jira
+</VirtualHost>
+ 
+<VirtualHost *:80>
+    ServerName mybitbucket.com
+     
+    ProxyRequests Off
+    ProxyVia Off
+     
+    <Proxy *>
+         Require all granted
+    </Proxy>
+ 
+    ProxyPass /bitbucket http://<internal_domain>:7990/bitbucket
+    ProxyPassReverse /bitbucket http://<internal_domain>:7990/bitbucket
+</VirtualHost>
+
+=================================
+sudo apt-get install build-essential
+Create a sample Node.js application
+For this example, we will begin by creating a separate directory in your website’s document root for housing Node.js applications:
+sudo mkdir /var/www/html/nodejs
+Create the file hello.js in this directory:
+sudo nano /var/www/html/nodejs/hello.js
+Add the following example content to the file:
+#!/usr/bin/env nodejs
+var http = require('http');
+http.createServer(function (request, response) {
+   response.writeHead(200, {'Content-Type': 'text/plain'});
+   response.end('Hello World! Node.js is working correctly.\n');
+}).listen(8080);
+console.log('Server running at http://127.0.0.1:8080/');
+Save and exit the file and make the file executable:
+
+sudo chmod 755 hello.js
+Install PM2
+Use npm to install PM2 with the command:
+
+sudo npm install -g pm2
+Start the hello.js example script that you’ve just created with the command:
+
+sudo pm2 start hello.js
+As root add PM2 to the startup scripts, so that it will automatically restart if the server is rebooted:
+
+sudo pm2 startup systemd
+
+ProxyRequests Off
+   ProxyPreserveHost On
+   ProxyVia Full
+   <Proxy *>
+      Require all granted
+   </Proxy>
+
+   <Location /nodejs>
+      ProxyPass http://127.0.0.1:8080
+      ProxyPassReverse http://127.0.0.1:8080
+   </Location>
+
+---
+<VirtualHost *:80>
+ServerName example.com
+
+   ProxyRequests Off
+   ProxyPreserveHost On
+   ProxyVia Full
+   <Proxy *>
+      Require all granted
+   </Proxy>
+
+   <Location /nodejs>
+      ProxyPass http://127.0.0.1:8080
+      ProxyPassReverse http://127.0.0.1:8080
+   </Location>
+
+    <Directory "/var/www/example.com/html">
+    AllowOverride All
+    </Directory>
+</VirtualHost>
+
+
