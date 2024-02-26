@@ -142,3 +142,62 @@ ServerName example.com
 </VirtualHost>
 
 
+============================================
+https://academy.jahia.com/documentation/jexperience/jexperience-2.x-and-3.x/system-administrator/installing-and-configuring-jexperience/configuring-apache-and-security-settings
+<VirtualHost *:80>
+        Include /var/www/vhosts/unomi.apache.org/conf/common.conf
+</VirtualHost>
+<IfModule mod_ssl.c>
+    <VirtualHost *:443>
+        Include /var/www/vhosts/unomi.apache.org/conf/common.conf 
+        SSLEngine on
+        SSLCertificateFile /var/www/vhosts/unomi.apache.org/conf/ssl/24d5b9691e96eafa.crt 
+        SSLCertificateKeyFile /var/www/vhosts/unomi.apache.org/conf/ssl/apache.org.key 
+        SSLCertificateChainFile /var/www/vhosts/unomi.apache.org/conf/ssl/gd_bundle-g2-g1.crt
+        <FilesMatch "\.(cgi|shtml|phtml|php)$">
+            SSLOptions +StdEnvVars
+        </FilesMatch>
+        <Directory /usr/lib/cgi-bin>
+            SSLOptions +StdEnvVars
+        </Directory>
+        BrowserMatch "MSIE [2-6]" \
+        nokeepalive ssl-unclean-shutdown \
+        downgrade-1.0 force-response-1.0
+        BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+    </VirtualHost>
+</IfModule>
+=====================================
+ServerName unomi.apache.org
+ServerAdmin webmaster@apache.org
+DocumentRoot /var/www/vhosts/unomi.apache.org/html
+CustomLog /var/log/apache2/access-unomi.apache.org.log combined
+<Directory />
+    Options FollowSymLinks
+    AllowOverride None
+</Directory>
+<Directory /var/www/vhosts/unomi.apache.org/html>
+    Options FollowSymLinks MultiViews
+    AllowOverride None
+    Order allow,deny
+    allow from all
+</Directory>
+<Location /cxs>
+    Order deny,allow
+    deny from all
+    allow from <jahia-dx-ip-address>
+</Location>
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+RewriteRule .* - [F]
+ProxyPreserveHost On
+ProxyPass /server-status !
+ProxyPass /robots.txt !
+RewriteCond %{HTTP_USER_AGENT} Googlebot [OR]
+RewriteCond %{HTTP_USER_AGENT} msnbot [OR]
+RewriteCond %{HTTP_USER_AGENT} Slurp
+RewriteRule ^.* - [F,L]
+ProxyPass / http://localhost:8181/ connectiontimeout=20 timeout=300 ttl=120
+ProxyPassReverse / http://locahost:8181 
+======================
+
+
