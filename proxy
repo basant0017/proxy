@@ -1,3 +1,15 @@
+Mapping domain name to tomcat 
+https://metamug.com/article/networking/lets-encrypt-ssl-on-tomcat.html
+<Host name="api.example.com"  appBase="webapps"
+            unpackWARs="true" autoDeploy="true" deployXML="true">
+
+Also update your connector tag in server.xml
+
+<Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443"
+               scheme="https" secure="true" proxyName="api.example.com" proxyPort="443" />
+
 
 
 =====================================================
